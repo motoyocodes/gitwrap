@@ -1,0 +1,170 @@
+import { forwardRef } from "react";
+import { Crown, Layers, Code2, Github } from "lucide-react";
+
+type ReceiptProps = {
+  data: {
+    username: string;
+    totalCommits: number;
+    vibe: string;
+    topLanguages: { name: string; color: string; count: number }[];
+  };
+};
+
+const Receipt = forwardRef<HTMLDivElement, ReceiptProps>(({ data }, ref) => {
+  const date = new Date().toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  return (
+    <div
+      ref={ref}
+      className="w-125 p-8 text-white font-mono border flex flex-col gap-6 relative overflow-hidden"
+      style={{ backgroundColor: "#09090b", borderColor: "#27272a" }}
+    >
+      {/* Decorative Background  */}
+      <div
+        className="absolute top-0 right-0 w-64 h-64 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2"
+        style={{ backgroundColor: "rgba(168, 85, 247, 0.1)" }}
+      />
+
+      {/*  Header */}
+      <div
+        className="flex justify-between items-start border-b pb-6 relative z-10"
+        style={{ borderColor: "#27272a" }}
+      >
+        <div>
+          <div
+            className="flex items-center gap-2 text-xs tracking-widest uppercase mb-1"
+            style={{ color: "#a1a1aa" }}
+          >
+            <Github className="w-4 h-4" />
+            <span>GitHub Wrapped</span>
+          </div>
+          <h1 className="text-4xl font-black tracking-tighter">2025</h1>
+        </div>
+        <div className="text-right">
+          <div
+            className="text-xs uppercase tracking-wider"
+            style={{ color: "#71717a" }}
+          >
+            Date
+          </div>
+          <div className="text-sm font-bold">{date}</div>
+        </div>
+      </div>
+
+      {/* User Info */}
+      <div className="relative z-10">
+        <div
+          className="text-xs uppercase tracking-wider mb-1"
+          style={{ color: "#71717a" }}
+        >
+          Developer
+        </div>
+        <div className="text-3xl font-bold text-white">@{data.username}</div>
+      </div>
+
+      {/* 3. Main Stats Grid */}
+      <div className="grid grid-cols-2 gap-4 relative z-10">
+        {/* Commits Card */}
+        <div
+          className="p-5 rounded-lg border flex flex-col items-center justify-center text-center"
+          style={{
+            backgroundColor: "rgba(24, 24, 27, 0.5)",
+            borderColor: "#27272a",
+          }}
+        >
+          <div
+            className="flex items-center justify-center gap-2 text-xs mb-2"
+            style={{ color: "#a1a1aa" }}
+          >
+            <Layers className="w-4 h-4" />
+            <span>Commits</span>
+          </div>
+          <div className="text-3xl font-bold">{data.totalCommits}</div>
+        </div>
+
+        {/* Vibe Card */}
+        <div
+          className="p-5 rounded-lg border flex flex-col items-center justify-center text-center"
+          style={{
+            backgroundColor: "rgba(24, 24, 27, 0.5)",
+            borderColor: "#27272a",
+          }}
+        >
+          <div
+            className="flex items-center justify-center gap-2 text-xs mb-2"
+            style={{ color: "#c084fc" }}
+          >
+            <Crown className="w-4 h-4" />
+            <span>Vibe</span>
+          </div>
+
+          <div className="text-xl font-bold leading-tight">{data.vibe}</div>
+        </div>
+      </div>
+
+      {/*  Top Languages List */}
+      <div className="space-y-3 relative z-10">
+        <div
+          className="text-xs uppercase tracking-wider border-b pb-2"
+          style={{ color: "#71717a", borderColor: "#27272a" }}
+        >
+          Top Languages
+        </div>
+        {data.topLanguages.slice(0, 3).map((lang, i) => (
+          <div key={lang.name} className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-mono" style={{ color: "#71717a" }}>
+                0{i + 1}
+              </span>
+              <span className="font-bold text-lg">{lang.name}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm" style={{ color: "#a1a1aa" }}>
+                {lang.count}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer and Barcode */}
+      <div
+        className="pt-6 mt-2 border-t border-dashed relative z-10"
+        style={{ borderColor: "#27272a" }}
+      >
+        <div className="flex justify-between items-end">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Code2 className="w-4 h-4" style={{ color: "#52525b" }} />
+              <span
+                className="text-[10px] uppercase"
+                style={{ color: "#52525b" }}
+              >
+                Verified Output
+              </span>
+            </div>
+            <p className="text-[10px]" style={{ color: "#3f3f46" }}>
+              generated by git-wrapped.vercel.app
+            </p>
+          </div>
+          {/* Fake Barcode Visual */}
+          <div className="flex gap-1 h-8 opacity-50">
+            {[...Array(15)].map((_, i) => (
+              <div
+                key={i}
+                className={`w-1 bg-white ${i % 2 === 0 ? "h-full" : "h-2/3"}`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+Receipt.displayName = "Receipt";
+export default Receipt;
