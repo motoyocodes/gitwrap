@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Flame, Skull } from "lucide-react";
+import { Skull } from "lucide-react";
 import { generateRoast } from "@/lib/roast";
 import { useMemo } from "react";
 

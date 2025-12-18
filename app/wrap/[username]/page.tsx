@@ -1,6 +1,8 @@
 import { fetchGitHubStats } from "@/lib/github";
 import StoryContainer from "@/components/StoryContainer";
 import { processGitHubData } from "@/lib/transformData";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 
 // This type tells Nextjs that params is a Promise
 type Props = {
@@ -34,12 +36,12 @@ export default async function WrapPage({ params }: Props) {
             </p>
           </div>
 
-          <a
+          <Link
             href="/"
             className="inline-flex items-center justify-center px-6 py-3 text-sm font-bold text-black bg-white rounded-full hover:bg-zinc-200 transition-colors"
           >
             Try Another Username
-          </a>
+          </Link>
         </div>
       </div>
     );
