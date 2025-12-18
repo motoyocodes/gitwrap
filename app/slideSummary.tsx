@@ -21,7 +21,7 @@ const XLogo = ({ className }: { className?: string }) => (
 export default function SlideSummary({ data }: { data: any }) {
   const receiptRef = useRef<HTMLDivElement>(null);
 
-  // --- DOWNLOAD LOGIC ---
+  // DOWNLOAD LOGIC
   const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation(); // STOP THE CLICK FROM GOING TO THE PARENT
 
@@ -45,22 +45,23 @@ export default function SlideSummary({ data }: { data: any }) {
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation(); // STOP THE CLICK FROM GOING TO THE PARENT
 
-    const text = `I'm a ${data.vibe} 🧛‍♂️ with ${data.totalCommits} commits in 2025.\n\nCheck out your GitHub Wrapped here:`;
-    const url =
-      typeof window !== "undefined"
-        ? window.location.href
-        : "https://your-domain.com";
+    // 1. HARDCODED URL that Points to Homepage
+    const shareUrl = "https://gitwrap-2025-topaz.vercel.app";
 
+    // 2. TWEET TEXT
+    const text = `I'm a ${data.vibe} 🧛‍♂️ with ${data.totalCommits} commits in 2025.\n\nCheck out your GitHub Wrapped here:`;
+
+    // 3. GENERATE LINK
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
       text
-    )}&url=${encodeURIComponent(url)}`;
+    )}&url=${encodeURIComponent(shareUrl)}`;
 
     window.open(twitterUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
     <div className="flex flex-col h-full w-full p-5 py-8 md:p-6 md:py-12 space-y-5 md:space-y-6 relative">
-      {/* --- HIDDEN RECEIPT --- */}
+      {/*  HIDDEN RECEIPT*/}
       <div className="absolute top-0 left-0 overflow-hidden w-0 h-0 opacity-0 pointer-events-none">
         <Receipt ref={receiptRef} data={data} />
       </div>
@@ -79,9 +80,9 @@ export default function SlideSummary({ data }: { data: any }) {
         </h1>
       </motion.div>
 
-      {/* The Bento Grid */}
+      {/*  Grid */}
       <div className="grid grid-cols-2 gap-2 md:gap-3 flex-1 h-full">
-        {/* Card 1: Vibe */}
+        {/*  Vibe */}
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -97,7 +98,7 @@ export default function SlideSummary({ data }: { data: any }) {
           </div>
         </motion.div>
 
-        {/* Card 2: Contributions */}
+        {/*  Contributions */}
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -115,7 +116,7 @@ export default function SlideSummary({ data }: { data: any }) {
           </div>
         </motion.div>
 
-        {/* Card 3: Top Lang */}
+        {/* Top Lang */}
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -137,9 +138,9 @@ export default function SlideSummary({ data }: { data: any }) {
           </div>
         </motion.div>
 
-        {/*  ACTIONS ROW  */}
+        {/* ACTIONS ROW   */}
         <div className="col-span-2 flex justify-between gap-2 md:gap-3 mt-1 md:mt-2 items-center">
-          {/* 1. Share Button */}
+          {/*  Share Button */}
           <motion.button
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -153,7 +154,7 @@ export default function SlideSummary({ data }: { data: any }) {
             Share
           </motion.button>
 
-          {/* 2. Download Button */}
+          {/*  Download Button */}
           <motion.button
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
