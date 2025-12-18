@@ -1,10 +1,7 @@
 import type { NextConfig } from "next";
 
-// REMOVED ": NextConfig" so TypeScript stops complaining
-const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+const nextConfig: NextConfig = {
+  // We removed the 'eslint' block because it causes the crash.
   typescript: {
     ignoreBuildErrors: true,
   },
