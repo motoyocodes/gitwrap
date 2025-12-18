@@ -17,8 +17,6 @@ export default function Home() {
 
     if (username) {
       setIsLoading(true);
-      // Simulate a brief delay if you want the animation to be seen,
-      // or just push immediately.
       router.push(`/wrap/${username}`);
     }
   }
