@@ -51,7 +51,7 @@ export default function SlideSummary({ data }: { data: any }) {
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    const baseUrl = typeof window !== "undefined" && window.location.origin ? window.location.origin : "https://gitwrap-2025-topaz.vercel.app";
+    const baseUrl = typeof window !== "undefined" && window.location.origin ? window.location.origin : "https://gitwrap-mu.vercel.app";
     const shareUrl = `${baseUrl}/wrap/${data.username}`;
     const text = `My 2025 GitHub Wrapped is in: I'm "${data.vibe}" with ${data.totalCommits} commits! 🚀 Check your developer persona:`;
 
@@ -66,7 +66,7 @@ export default function SlideSummary({ data }: { data: any }) {
   const handleCopyBadge = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    const baseUrl = typeof window !== "undefined" && window.location.origin ? window.location.origin : "https://gitwrap-2025-topaz.vercel.app";
+    const baseUrl = typeof window !== "undefined" && window.location.origin ? window.location.origin : "https://gitwrap-mu.vercel.app";
     const badgeMarkdown = `[![GitWrap 2025](${baseUrl}/api/badge/${data.username})](${baseUrl}/wrap/${data.username})`;
 
     try {

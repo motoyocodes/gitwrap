@@ -2,7 +2,7 @@
 
 **Gitwrap** is a dynamic, interactive web application that analyzes your GitHub profile to generate a "Spotify Wrapped" style summary of your coding year. It calculates your coding hours, favorite languages, and commits, determines your "Developer Persona," and even roasts your coding habits.
 
-[**View Live Demo**](https://your-domain.com) ·
+[**View Live Demo**](https://gitwrap-mu.vercel.app/) ·
 [**Report Bug**](https://github.com/motoyocodes/gitwrap/issues)
 
 ## Features

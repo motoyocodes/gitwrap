@@ -13,7 +13,7 @@ export default function BadgeShowcasePage({
   const { username } = use(params);
   const [copiedType, setCopiedType] = useState<string | null>(null);
 
-  const baseUrl = typeof window !== "undefined" && window.location.origin ? window.location.origin : "https://gitwrap-2025-topaz.vercel.app";
+  const baseUrl = typeof window !== "undefined" && window.location.origin ? window.location.origin : "https://gitwrap-mu.vercel.app";
   const badgeSvgUrl = `${baseUrl}/api/badge/${username}`;
   const wrapUrl = `${baseUrl}/wrap/${username}`;
 

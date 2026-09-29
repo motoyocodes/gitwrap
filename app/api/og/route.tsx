@@ -178,7 +178,7 @@ export async function GET(req: NextRequest) {
               letterSpacing: "1px",
             }}
           >
-            gitwrap-2025-topaz.vercel.app • Verified Developer Output
+            gitwrap-mu.vercel.app • Verified Developer Output
           </div>
         </div>
       ),
