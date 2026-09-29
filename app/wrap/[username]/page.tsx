@@ -64,7 +64,7 @@ export default async function WrapPage({ params }: Props) {
             404
           </h1>
 
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <h2 className="text-2xl font-bold text-white">
               Developer not found.
             </h2>
