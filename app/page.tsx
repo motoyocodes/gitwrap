@@ -67,7 +67,7 @@ export default function Home() {
               type="text"
               placeholder="Enter GitHub username..."
               disabled={isLoading}
-              className="w-full bg-transparent border-none text-white px-4 py-3 focus:outline-none placeholder:text-zinc-600 disabled:cursor-not-allowed"
+              className="w-full bg-transparent border-none text-white px-4 py-3 focus:outline-none placeholder:text-zinc-600 disabled:cursor-not-allowed font-medium"
               autoComplete="off"
               required
             />
@@ -75,7 +75,7 @@ export default function Home() {
             <button
               type="submit"
               disabled={isLoading}
-              className="bg-white text-sm hover:bg-zinc-200 md:text-md text-black px-3 md:px-5 py-1.5 md:py-2.5 rounded-lg font-medium transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 min-w-20 justify-center"
+              className="bg-white text-sm hover:bg-zinc-200 md:text-md text-black px-4 md:px-5 py-2 md:py-2.5 rounded-lg font-semibold transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 min-w-20 justify-center cursor-pointer"
             >
               {isLoading ? (
                 <>
@@ -83,22 +83,58 @@ export default function Home() {
                   <span>...</span>
                 </>
               ) : (
-                "Check"
+                "Wrap"
               )}
             </button>
           </div>
         </form>
+
+        {/* Demo Quick Select */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="space-y-2.5"
+        >
+          <span className="text-xs uppercase font-mono tracking-wider text-zinc-500">
+            Or inspect a legend:
+          </span>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {[
+              { handle: "shadcn", label: "shadcn" },
+              { handle: "torvalds", label: "Linus Torvalds" },
+              { handle: "leerob", label: "Lee Robinson" },
+              { handle: "gaearon", label: "Dan Abramov" },
+            ].map((profile) => (
+              <button
+                key={profile.handle}
+                type="button"
+                disabled={isLoading}
+                onClick={() => {
+                  setIsLoading(true);
+                  router.push(`/wrap/${profile.handle}`);
+                }}
+                className="px-3 py-1.5 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-xs font-mono text-zinc-300 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <span className="text-indigo-400">@</span>
+                <span>{profile.handle}</span>
+              </button>
+            ))}
+          </div>
+        </motion.div>
 
         {/* Footer */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="flex justify-center gap-4 text-xs text-zinc-600"
+          className="flex justify-center gap-4 text-xs text-zinc-600 font-mono"
         >
-          <span>Uses GitHub GraphQL API</span>
+          <span>GitHub GraphQL v4</span>
           <span>•</span>
-          <span>Next.js 15</span>
+          <span>Next.js 16</span>
+          <span>•</span>
+          <span>2025 Wrapped</span>
         </motion.div>
       </div>
     </main>

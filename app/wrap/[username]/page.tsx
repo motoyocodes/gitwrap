@@ -1,13 +1,51 @@
+import type { Metadata } from "next";
 import { fetchGitHubStats } from "@/lib/github";
 import StoryContainer from "@/components/StoryContainer";
 import { processGitHubData } from "@/lib/transformData";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 
 // This type tells Nextjs that params is a Promise
 type Props = {
   params: Promise<{ username: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { username } = await params;
+  const rawData = await fetchGitHubStats(username);
+
+  if (!rawData) {
+    return {
+      title: `${username} | GitWrap 2025`,
+      description: `Developer stats not found for @${username}.`,
+    };
+  }
+
+  const clean = processGitHubData(rawData);
+  const ogUrl = `/api/og?username=${encodeURIComponent(clean.username)}&commits=${clean.totalCommits}&vibe=${encodeURIComponent(clean.vibe)}&lang=${encodeURIComponent(clean.topLanguages[0]?.name || "Code")}&avatar=${encodeURIComponent(clean.avatarUrl || "")}`;
+
+  return {
+    title: `@${clean.username}'s 2025 Wrapped • ${clean.vibe}`,
+    description: `@${clean.username} shipped ${clean.totalCommits} commits in 2025 with top weapon ${clean.topLanguages[0]?.name || "Code"}. Persona: "${clean.vibe}".`,
+    openGraph: {
+      title: `@${clean.username}'s 2025 GitHub Wrapped`,
+      description: `@${clean.username} is "${clean.vibe}" with ${clean.totalCommits} commits in 2025!`,
+      images: [
+        {
+          url: ogUrl,
+          width: 1200,
+          height: 630,
+          alt: `@${clean.username}'s GitHub Wrapped`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `@${clean.username}'s 2025 GitHub Wrapped`,
+      description: `@${clean.username} is "${clean.vibe}" with ${clean.totalCommits} commits in 2025!`,
+      images: [ogUrl],
+    },
+  };
+}
 
 export default async function WrapPage({ params }: Props) {
   //  Await the params to get the username
@@ -26,7 +64,7 @@ export default async function WrapPage({ params }: Props) {
             404
           </h1>
 
-          <div className="space`-y-2">
+          <div className="space-y-2">
             <h2 className="text-2xl font-bold text-white">
               Developer not found.
             </h2>

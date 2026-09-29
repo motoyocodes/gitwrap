@@ -28,3 +28,13 @@ body {
 button {
   cursor: pointer;
 }
+
+@keyframes storyProgress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+

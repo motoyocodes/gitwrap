@@ -1,22 +1,24 @@
-export function processGitHubData(data: any) {
+import { StoryData, WeeklyVibeData, DayContribution, TopRepoData } from "@/types";
+
+export function processGitHubData(data: any): StoryData {
   const { contributionsCollection, repositories } = data;
 
-  // 1. Get the flat number
-  const totalCommits = contributionsCollection.totalCommitContributions;
+  // 1. Get total commits
+  const totalCommits = contributionsCollection?.totalCommitContributions || 0;
 
   // 2. Logic for Languages
   const languageMap = new Map<string, { count: number; color: string }>();
 
-  repositories.nodes.forEach((repo: any) => {
-    if (repo.languages.edges.length > 0) {
+  repositories?.nodes?.forEach((repo: any) => {
+    if (repo?.languages?.edges?.length > 0) {
       const lang = repo.languages.edges[0].node;
       const current = languageMap.get(lang.name) || {
         count: 0,
-        color: lang.color,
+        color: lang.color || "#3b82f6",
       };
       languageMap.set(lang.name, {
         count: current.count + 1,
-        color: lang.color,
+        color: lang.color || "#3b82f6",
       });
     }
   });
@@ -32,10 +34,12 @@ export function processGitHubData(data: any) {
 
   // Calculate Repo Distribution
   const uniqueLangs = new Set(
-    repositories.nodes.map((r: any) => r.languages?.edges[0]?.node.name)
+    repositories?.nodes
+      ?.map((r: any) => r.languages?.edges?.[0]?.node?.name)
+      .filter(Boolean)
   ).size;
 
-  //  MAIN VIBE LOGIC
+  // MAIN VIBE LOGIC
   if (totalCommits > 2000) {
     vibe = "The 10x Engineer";
   } else if (totalCommits < 50) {
@@ -96,15 +100,30 @@ export function processGitHubData(data: any) {
     }
   }
 
-  let clockVibe = "The 9-to-5er"; // Default value
+  // 4. Time of Day (Clock Vibe) & Day of Week
+  let clockVibe = "The 9-to-5er";
   const commitTimes: number[] = [];
+  const dayCounts = [0, 0, 0, 0, 0, 0, 0]; // 0: Sun, 1: Mon, ..., 6: Sat
+  const dayNames = [
+    { day: "Sunday", short: "Sun" },
+    { day: "Monday", short: "Mon" },
+    { day: "Tuesday", short: "Tue" },
+    { day: "Wednesday", short: "Wed" },
+    { day: "Thursday", short: "Thu" },
+    { day: "Friday", short: "Fri" },
+    { day: "Saturday", short: "Sat" },
+  ];
 
-  if (contributionsCollection.commitContributionsByRepository) {
+  if (contributionsCollection?.commitContributionsByRepository) {
     contributionsCollection.commitContributionsByRepository.forEach(
       (repo: any) => {
-        repo.contributions.nodes.forEach((commit: any) => {
-          const date = new Date(commit.occurredAt);
-          commitTimes.push(date.getHours());
+        repo?.contributions?.nodes?.forEach((commit: any) => {
+          if (commit?.occurredAt) {
+            const date = new Date(commit.occurredAt);
+            commitTimes.push(date.getHours());
+            const dayIndex = date.getDay();
+            dayCounts[dayIndex] += 1;
+          }
         });
       }
     );
@@ -114,19 +133,105 @@ export function processGitHubData(data: any) {
     const nightCommits = commitTimes.filter((h) => h >= 20 || h < 4).length;
     const morningCommits = commitTimes.filter((h) => h >= 4 && h < 12).length;
 
-    if (nightCommits > commitTimes.length * 0.5) {
+    if (nightCommits > commitTimes.length * 0.45) {
       clockVibe = "The Vampire Coder";
-    } else if (morningCommits > commitTimes.length * 0.5) {
+    } else if (morningCommits > commitTimes.length * 0.45) {
       clockVibe = "The Early Bird";
     }
   }
 
+  // 5. Weekly Rhythm Analysis
+  const totalSampled = dayCounts.reduce((a, b) => a + b, 0);
+  const maxDayCount = Math.max(...dayCounts, 1);
+  const peakDayIndex = dayCounts.indexOf(Math.max(...dayCounts));
+  const peakDayName = dayNames[peakDayIndex].day;
+
+  const weekendCommits = dayCounts[0] + dayCounts[6]; // Sun + Sat
+  const weekendPct =
+    totalSampled > 0 ? Math.round((weekendCommits / totalSampled) * 100) : 0;
+  const fridayCount = dayCounts[5];
+
+  let weeklyTitle = "The Steady Flow";
+  let weeklyDesc = "Consistent momentum across the entire week.";
+  let weeklyRoast =
+    "You don't have a schedule, code just leaks out of you 24/7.";
+
+  if (totalSampled > 0) {
+    if (weekendPct >= 45) {
+      weeklyTitle = "The Weekend Warrior";
+      weeklyDesc = `${weekendPct}% of your commits drop on weekends. Who needs grass?`;
+      weeklyRoast = "You treat Saturday and Sunday as bonus sprint cycles.";
+    } else if (fridayCount === 0 && totalSampled >= 10) {
+      weeklyTitle = "Never On A Friday";
+      weeklyDesc =
+        "Zero Friday commits detected. The ultimate production survivor.";
+      weeklyRoast = "You shut down Slack at 4:30 PM and never look back.";
+    } else if (peakDayIndex === 0) {
+      weeklyTitle = "The Sunday Panic Pusher";
+      weeklyDesc =
+        "Sunday is your heaviest commit day. Deadline adrenaline is real.";
+      weeklyRoast =
+        "Cramming commits before Monday morning standup. We see you.";
+    } else if (peakDayIndex === 1) {
+      weeklyTitle = "The Monday Sprinter";
+      weeklyDesc =
+        "Hitting the ground running on Monday morning with zero chill.";
+      weeklyRoast = "Calm down, it's just Monday. The servers will survive.";
+    } else if (weekendPct <= 10) {
+      weeklyTitle = "The Corporate Clockworker";
+      weeklyDesc =
+        "Strict 9-to-5 Monday through Friday. Work-life balance is elite.";
+      weeklyRoast = "Your git history matches an office badge swipe card.";
+    } else {
+      weeklyTitle = `The ${peakDayName} Powerhouse`;
+      weeklyDesc = `Peak velocity achieved every ${peakDayName}.`;
+      weeklyRoast = `Most productive on ${peakDayName}s, running on vibes the rest of the week.`;
+    }
+  }
+
+  const days: DayContribution[] = dayNames.map((d, idx) => ({
+    day: d.day,
+    shortDay: d.short,
+    count: dayCounts[idx],
+    percentage: Math.round((dayCounts[idx] / maxDayCount) * 100),
+  }));
+
+  const weeklyVibe: WeeklyVibeData = {
+    title: weeklyTitle,
+    desc: weeklyDesc,
+    roast: weeklyRoast,
+    peakDay: peakDayName,
+    weekendPct,
+    days,
+  };
+
+  // 6. Top Repo & Star Power
+  let topRepo: TopRepoData | undefined;
+  if (repositories?.nodes?.length > 0) {
+    const first = repositories.nodes[0];
+    const totalStars = repositories.nodes.reduce(
+      (acc: number, r: any) => acc + (r?.stargazerCount || 0),
+      0
+    );
+    topRepo = {
+      name: first?.name || "N/A",
+      stars: first?.stargazerCount || 0,
+      language: first?.languages?.edges?.[0]?.node?.name,
+      totalStars,
+    };
+  }
+
   return {
     username: data.login,
-    totalCommits: totalCommits,
+    name: data.name || data.login,
+    avatarUrl: data.avatarUrl,
+    bio: data.bio || undefined,
+    totalCommits,
     topLanguages,
     vibe,
     clockVibe,
-    avatarUrl: data.avatarUrl,
+    weeklyVibe,
+    topRepo,
   };
 }
+

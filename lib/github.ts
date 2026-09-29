@@ -16,9 +16,9 @@ export async function fetchGitHubStats(username: string) {
       }
       contributionsCollection {
         totalCommitContributions
-        # We need this for the "Night Owl" logic
-        commitContributionsByRepository(maxRepositories: 10) {
-          contributions(first: 10) {
+        # For Night Owl and Weekly Rhythm analytics
+        commitContributionsByRepository(maxRepositories: 20) {
+          contributions(first: 50) {
             nodes {
               occurredAt
             }
@@ -43,11 +43,17 @@ export async function fetchGitHubStats(username: string) {
   }
 `;
   try {
+    if (!process.env.GITHUB_TOKEN) {
+      console.error("Missing GITHUB_TOKEN environment variable. Please set it in .env.local.");
+      return null;
+    }
+
     const res = await fetch(GITHUB_GRAPHQL_API, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
         "Content-Type": "application/json",
+        "User-Agent": "GitWrap-App",
       },
       body: JSON.stringify({
         query,
@@ -62,12 +68,17 @@ export async function fetchGitHubStats(username: string) {
 
     const json = await res.json();
 
+    if (!res.ok) {
+      console.error(`GitHub API HTTP ${res.status}:`, json.message || json);
+      return null;
+    }
+
     if (json.errors) {
       console.error("GitHub API Error:", json.errors);
       return null;
     }
 
-    return json.data.user;
+    return json.data?.user ?? null;
   } catch (error) {
     console.error("Fetching failed:", error);
     return null;
