@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { fetchGitHubStats } from "@/lib/github";
 import StoryContainer from "@/components/StoryContainer";
+import NoDataRoast from "@/components/NoDataRoast";
 import { processGitHubData } from "@/lib/transformData";
 import { resolveYear } from "@/lib/year";
 import Link from "next/link";
-import YearPicker from "@/components/YearPicker";
 
 // This type tells Nextjs that params is a Promise
 type Props = {
@@ -24,28 +24,43 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     };
   }
 
-  const clean = processGitHubData(rawData);
+  const totalCommits = rawData.contributionsCollection?.totalCommitContributions ?? 0;
+  const joinYear = rawData.createdAt ? new Date(rawData.createdAt).getFullYear() : null;
+
+  if (totalCommits === 0 || (joinYear !== null && year < joinYear)) {
+    const isBeforeJoin = joinYear !== null && year < joinYear;
+    return {
+      title: isBeforeJoin
+        ? `@${username} didn't exist on GitHub in ${year} | GitWrap`
+        : `@${username} had 0 commits in ${year} | GitWrap`,
+      description: isBeforeJoin
+        ? `@${username} joined GitHub in ${joinYear}. No commits found in ${year}!`
+        : `@${username} made 0 commits in ${year}. Complete AFK ghost town.`,
+    };
+  }
+
+  const clean = processGitHubData(rawData, year);
   const ogUrl = `/api/og?username=${encodeURIComponent(clean.username)}&year=${year}&commits=${clean.totalCommits}&vibe=${encodeURIComponent(clean.vibe)}&lang=${encodeURIComponent(clean.topLanguages[0]?.name || "Code")}&avatar=${encodeURIComponent(clean.avatarUrl || "")}`;
 
   return {
-    title: `@${clean.username}'s 2025 Wrapped • ${clean.vibe}`,
-    description: `@${clean.username} shipped ${clean.totalCommits} commits in 2025 with top weapon ${clean.topLanguages[0]?.name || "Code"}. Persona: "${clean.vibe}".`,
+    title: `@${clean.username}'s ${year} Wrapped • ${clean.vibe}`,
+    description: `@${clean.username} shipped ${clean.totalCommits} commits in ${year} with top weapon ${clean.topLanguages[0]?.name || "Code"}. Persona: "${clean.vibe}".`,
     openGraph: {
-      title: `@${clean.username}'s 2025 GitHub Wrapped`,
-      description: `@${clean.username} is "${clean.vibe}" with ${clean.totalCommits} commits in 2025!`,
+      title: `@${clean.username}'s ${year} GitHub Wrapped`,
+      description: `@${clean.username} is "${clean.vibe}" with ${clean.totalCommits} commits in ${year}!`,
       images: [
         {
           url: ogUrl,
           width: 1200,
           height: 630,
-          alt: `@${clean.username}'s GitHub Wrapped`,
+          alt: `@${clean.username}'s GitHub Wrapped ${year}`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `@${clean.username}'s 2025 GitHub Wrapped`,
-      description: `@${clean.username} is "${clean.vibe}" with ${clean.totalCommits} commits in 2025!`,
+      title: `@${clean.username}'s ${year} GitHub Wrapped`,
+      description: `@${clean.username} is "${clean.vibe}" with ${clean.totalCommits} commits in ${year}!`,
       images: [ogUrl],
     },
   };
@@ -90,15 +105,33 @@ export default async function WrapPage({ params, searchParams }: Props) {
     );
   }
 
+  // Check if user has zero commits or requested year before joining GitHub
+  const totalCommits = rawData.contributionsCollection?.totalCommitContributions ?? 0;
+  const activeYears: number[] = rawData.contributionsCollection?.contributionYears ?? [];
+  const createdAt = rawData.createdAt;
+  const joinYear = createdAt ? new Date(createdAt).getFullYear() : null;
+
+  if (totalCommits === 0 || (joinYear !== null && year < joinYear)) {
+    return (
+      <NoDataRoast
+        username={username}
+        name={rawData.name || username}
+        avatarUrl={rawData.avatarUrl}
+        requestedYear={year}
+        createdAt={createdAt}
+        activeYears={activeYears}
+      />
+    );
+  }
+
   //  Transform & Render
-  const cleanData = processGitHubData(rawData);
-  const years: number[] = rawData.contributionsCollection?.contributionYears ?? [year];
+  const cleanData = processGitHubData(rawData, year);
 
   return (
     <div className="h-screen w-full bg-stone-950 relative">
       {/* Steel Blue Background */}
       <div
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 -z-10 pointer-events-none"
         style={{
           backgroundImage: `
         radial-gradient(circle at 50% 50%, 
@@ -110,14 +143,24 @@ export default async function WrapPage({ params, searchParams }: Props) {
       `,
           backgroundSize: "100% 100%",
         }}
-
       />
-      <main className=" bg-black flex h-screen items-center justify-center p-0 md:py-4">
-        <div className="w-full h-screen md:h-auto md:max-w-md  bg-zinc-950 md:rounded-3xl border-0 md:border border-zinc-800 overflow-hidden relative shadow-2xl">
+      <main className="relative z-10 flex flex-col h-screen items-center justify-center p-0 md:py-4">
+        {/* Desktop top bar with back navigation */}
+        <div className="hidden md:flex items-center justify-between w-full max-w-md px-2 py-2 mb-2 text-xs font-mono text-zinc-400 relative z-30 pointer-events-auto">
+          <Link
+            href="/"
+            className="group flex items-center gap-1.5 cursor-pointer text-zinc-400 hover:text-white transition-colors py-1 px-2 -ml-2 rounded-lg hover:bg-zinc-800/50"
+          >
+            <span className="text-zinc-500 group-hover:text-zinc-300 transition-transform group-hover:-translate-x-0.5">←</span>
+            <span className="font-mono">New Wrap</span>
+          </Link>
+          <span className="text-zinc-500">{year} Edition</span>
+        </div>
+
+        <div className="w-full h-screen md:h-[520px] md:max-w-md bg-zinc-950 md:rounded-3xl border-0 md:border border-zinc-800 overflow-hidden relative shadow-2xl">
           <StoryContainer data={cleanData} />
         </div>
       </main>
-      <YearPicker years={years} current={year} />
     </div>
   );
 }

@@ -1,24 +1,22 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Check, Copy, ExternalLink, Sparkles, Code2, Layers } from "lucide-react";
 import { motion } from "framer-motion";
+import { resolveYear } from "@/lib/year";
 
-export default function BadgeShowcasePage({
-  params,
-}: {
-  params: Promise<{ username: string }>;
-}) {
-  const { username } = use(params);
+function BadgeShowcaseContent({ username }: { username: string }) {
+  const searchParams = useSearchParams();
+  const year = resolveYear(searchParams.get("year"));
   const [copiedType, setCopiedType] = useState<string | null>(null);
 
-  const baseUrl = typeof window !== "undefined" && window.location.origin ? window.location.origin : "https://gitwrap-mu.vercel.app";
-  const badgeSvgUrl = `${baseUrl}/api/badge/${username}`;
-  const wrapUrl = `${baseUrl}/wrap/${username}`;
+  const baseUrl = "https://gitwrap-mu.vercel.app";
+  const badgeSvgUrl = `${baseUrl}/api/badge/${username}?year=${year}`;
+  const wrapUrl = `${baseUrl}/wrap/${username}?year=${year}`;
 
-  const markdownSnippet = `[![GitWrap 2025](${badgeSvgUrl})](${wrapUrl})`;
-  const htmlSnippet = `<a href="${wrapUrl}"><img src="${badgeSvgUrl}" alt="${username}'s GitWrap 2025" /></a>`;
+  const markdownSnippet = `[![GitWrap ${year}](${badgeSvgUrl})](${wrapUrl})`;
 
   const copyToClipboard = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
@@ -34,7 +32,7 @@ export default function BadgeShowcasePage({
       {/* Top Nav */}
       <header className="w-full max-w-4xl flex items-center justify-between py-4">
         <Link
-          href={`/wrap/${username}`}
+          href={`/wrap/${username}?year=${year}`}
           className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -43,7 +41,7 @@ export default function BadgeShowcasePage({
 
         <div className="flex items-center gap-2">
           <span className="px-3 py-1 rounded-full bg-indigo-950/80 border border-indigo-800 text-indigo-300 text-xs font-mono">
-            README BADGE STUDIO
+            README BADGE STUDIO • {year}
           </span>
         </div>
       </header>
@@ -61,7 +59,7 @@ export default function BadgeShowcasePage({
           </motion.div>
 
           <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white">
-            Embed your 2025 Flex
+            Embed your {year} Flex
           </h1>
           <p className="text-zinc-400 text-sm md:text-base max-w-md mx-auto">
             Live vector SVG card that updates directly on your GitHub profile README.
@@ -81,14 +79,15 @@ export default function BadgeShowcasePage({
               <Code2 className="w-3.5 h-3.5 text-zinc-400" />
               README.md Preview
             </span>
+            <span className="text-zinc-600 font-mono text-[11px]">{year} Edition</span>
           </div>
 
           {/* Actual Live SVG Embed */}
           <div className="py-2 w-full flex justify-center overflow-x-auto">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/api/badge/${username}`}
-              alt={`${username}'s GitHub Wrapped 2025`}
+              src={`/api/badge/${username}?year=${year}`}
+              alt={`${username}'s GitHub Wrapped ${year}`}
               className="max-w-full h-auto rounded-2xl shadow-lg border border-white/5 hover:scale-[1.01] transition-transform duration-300"
             />
           </div>
@@ -145,7 +144,7 @@ export default function BadgeShowcasePage({
         {/* Actions Link */}
         <div className="flex items-center gap-4 text-xs font-mono text-zinc-500">
           <Link
-            href={`/wrap/${username}`}
+            href={`/wrap/${username}?year=${year}`}
             className="flex items-center gap-1.5 text-indigo-400 hover:text-indigo-300 transition-colors"
           >
             <span>Open Story Experience</span>
@@ -156,8 +155,22 @@ export default function BadgeShowcasePage({
 
       {/* Footer */}
       <footer className="w-full max-w-4xl py-4 text-center text-xs text-zinc-600 font-mono">
-        GitWrap 2025 • Dynamic SVG Generator
+        GitWrap {year} • Dynamic SVG Generator
       </footer>
     </div>
+  );
+}
+
+export default function BadgeShowcasePage({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}) {
+  const { username } = use(params);
+
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black" />}>
+      <BadgeShowcaseContent username={username} />
+    </Suspense>
   );
 }

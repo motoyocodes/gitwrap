@@ -11,6 +11,7 @@ import SlideSummary from "@/app/slideSummary";
 import { ChevronRight, ChevronLeft, Volume2, VolumeX, Pause } from "lucide-react";
 import { StoryData } from "@/types";
 import { sound } from "@/lib/sound";
+import YearPicker from "@/components/YearPicker";
 
 const SLIDE_DURATION = 5500; // 5.5s per slide
 
@@ -137,7 +138,7 @@ export default function StoryContainer({ data }: { data: StoryData }) {
   };
 
   return (
-    <div className="relative w-full h-full bg-zinc-950 overflow-hidden select-none">
+    <div className="relative w-full h-full bg-zinc-950 md:rounded-3xl border-0 md:border border-zinc-800 overflow-hidden shadow-2xl select-none">
       {/* Top Header Controls: Progress Bars & Audio Toggle */}
       <div className="absolute top-0 left-0 w-full p-4 z-40 flex flex-col gap-2 pointer-events-none">
         {/* Progress Bar Segments */}
@@ -172,29 +173,38 @@ export default function StoryContainer({ data }: { data: StoryData }) {
           })}
         </div>
 
-        {/* Audio / Pause Status Bar */}
+        {/* Audio / Pause Status Bar & Year Picker */}
         <div className="flex items-center justify-between px-1 text-xs text-white/50">
           <div className="flex items-center gap-1.5">
-            {isPaused && (
+            {isPaused ? (
               <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-[10px] text-white/90 border border-white/10 animate-pulse">
                 <Pause className="w-2.5 h-2.5 fill-white" /> Paused
               </span>
+            ) : (
+              <span className="text-[11px] font-mono text-white/60 tracking-tight">@{data.username}</span>
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={toggleSound}
-            className="p-1.5 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/10 text-white/70 hover:text-white transition-all cursor-pointer pointer-events-auto"
-            title={isMuted ? "Unmute audio" : "Mute audio"}
-            aria-label={isMuted ? "Unmute audio" : "Mute audio"}
-          >
-            {isMuted ? (
-              <VolumeX className="w-3.5 h-3.5" />
-            ) : (
-              <Volume2 className="w-3.5 h-3.5 text-indigo-400" />
-            )}
-          </button>
+          <div className="flex items-center gap-1.5 pointer-events-auto">
+            <YearPicker
+              years={data.years && data.years.length > 0 ? data.years : [data.year]}
+              current={data.year}
+            />
+
+            <button
+              type="button"
+              onClick={toggleSound}
+              className="p-1.5 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/10 text-white/70 hover:text-white transition-all cursor-pointer"
+              title={isMuted ? "Unmute audio" : "Mute audio"}
+              aria-label={isMuted ? "Unmute audio" : "Mute audio"}
+            >
+              {isMuted ? (
+                <VolumeX className="w-3.5 h-3.5" />
+              ) : (
+                <Volume2 className="w-3.5 h-3.5 text-indigo-400" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -219,45 +229,28 @@ export default function StoryContainer({ data }: { data: StoryData }) {
       {/* Invisible Interactive Tap Zones */}
       {/* On last slide, restrict tap zones to top 60% so bottom action buttons remain easily clickable */}
       <div
-        className={`absolute top-0 left-0 w-1/3 ${
-          isLastSlide ? "h-3/5" : "h-full"
-        } z-20 cursor-pointer`}
+        className={`absolute top-0 left-0 w-1/3 ${isLastSlide ? "h-3/5" : "h-full"
+          } z-20 cursor-pointer`}
         onPointerDown={handleZoneDown}
         onPointerUp={handleLeftUp}
         onPointerCancel={() => setIsPaused(false)}
       />
       <div
-        className={`absolute top-0 left-1/3 w-1/3 ${
-          isLastSlide ? "h-3/5" : "h-full"
-        } z-20 cursor-pointer`}
+        className={`absolute top-0 left-1/3 w-1/3 ${isLastSlide ? "h-3/5" : "h-full"
+          } z-20 cursor-pointer`}
         onPointerDown={handleZoneDown}
         onPointerUp={handleCenterUp}
         onPointerCancel={() => setIsPaused(false)}
       />
       <div
-        className={`absolute top-0 right-0 w-1/3 ${
-          isLastSlide ? "h-3/5" : "h-full"
-        } z-20 cursor-pointer`}
+        className={`absolute top-0 right-0 w-1/3 ${isLastSlide ? "h-3/5" : "h-full"
+          } z-20 cursor-pointer`}
         onPointerDown={handleZoneDown}
         onPointerUp={handleRightUp}
         onPointerCancel={() => setIsPaused(false)}
       />
 
-      {/* Desktop Navigation Arrows */}
-      {currentIndex < slides.length - 1 && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            nextSlide();
-          }}
-          className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 hover:bg-black/80 border border-white/10 text-white/50 hover:text-white transition-all cursor-pointer z-30"
-          aria-label="Next slide"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-      )}
-
+      {/* Desktop Navigation Arrows - Compact, inside the container, with clear space from text */}
       {currentIndex > 0 && (
         <button
           type="button"
@@ -265,10 +258,26 @@ export default function StoryContainer({ data }: { data: StoryData }) {
             e.stopPropagation();
             prevSlide();
           }}
-          className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 hover:bg-black/80 border border-white/10 text-white/50 hover:text-white transition-all cursor-pointer z-30"
+          className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 hover:bg-black/90 border border-white/15 text-white/60 hover:text-white transition-all cursor-pointer z-30 items-center justify-center backdrop-blur-md shadow-md hover:scale-105 active:scale-95"
           aria-label="Previous slide"
+          title="Previous slide"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-3.5 h-3.5" />
+        </button>
+      )}
+
+      {currentIndex < slides.length - 1 && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            nextSlide();
+          }}
+          className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 hover:bg-black/90 border border-white/15 text-white/60 hover:text-white transition-all cursor-pointer z-30 items-center justify-center backdrop-blur-md shadow-md hover:scale-105 active:scale-95"
+          aria-label="Next slide"
+          title="Next slide"
+        >
+          <ChevronRight className="w-3.5 h-3.5" />
         </button>
       )}
     </div>

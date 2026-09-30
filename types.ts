@@ -30,6 +30,8 @@ export interface TopRepoData {
 }
 
 export type StoryData = {
+  year: number;
+  years?: number[];
   totalCommits: number;
   username: string;
   name?: string;
@@ -44,6 +46,7 @@ export type StoryData = {
 
 export interface ReceiptProps {
   data: {
+    year: number;
     username: string;
     totalCommits: number;
     vibe: string;

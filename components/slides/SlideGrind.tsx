@@ -51,7 +51,7 @@ export default function SlideGrind({ data }: SlideGrindProps) {
   const Icon = insight.icon;
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full p-12 text-center space-y-5 md:space-y-8 relative overflow-hidden">
+    <div className="flex flex-col items-center justify-center h-full w-full px-8 py-10 md:p-12 text-center space-y-5 md:space-y-8 relative overflow-hidden">
       {/*  Vibe Badge */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -89,7 +89,7 @@ export default function SlideGrind({ data }: SlideGrindProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className={`p-6 rounded-2xl border mt-10 backdrop-blur-sm max-w-sm w-full z-10 ${insight.bg} border-white/5`}
+        className={`p-5 md:p-6 rounded-2xl border mt-8 backdrop-blur-sm max-w-[310px] md:max-w-[330px] w-full z-10 ${insight.bg} border-white/5`}
       >
         <div
           className={`flex items-center justify-center gap-3 ${insight.color} mb-2`}

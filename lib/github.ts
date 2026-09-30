@@ -14,6 +14,7 @@ export async function fetchGitHubStats(username: string, year: number = new Date
       bio
       company
       location
+      createdAt
       followers { totalCount }
       contributionsCollection(from: $from, to: $to) {
         contributionYears

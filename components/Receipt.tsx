@@ -3,6 +3,7 @@ import { Crown, Layers, Code2, Github } from "lucide-react";
 
 type ReceiptProps = {
   data: {
+    year?: number;
     username: string;
     totalCommits: number;
     vibe: string;
@@ -42,7 +43,7 @@ const Receipt = forwardRef<HTMLDivElement, ReceiptProps>(({ data }, ref) => {
             <Github className="w-4 h-4" />
             <span>GitHub Wrapped</span>
           </div>
-          <h1 className="text-4xl font-black tracking-tighter">2025</h1>
+          <h1 className="text-4xl font-black tracking-tighter">{data.year ?? 2025}</h1>
         </div>
         <div className="text-right">
           <div

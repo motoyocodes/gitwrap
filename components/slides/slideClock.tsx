@@ -49,21 +49,21 @@ export default function SlideClock({ data }: SlideClockProps) {
   const isNight = vibe === "The Vampire Coder";
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full p-2 md:p-8 text-center space-y-5 md:space-y-10 relative overflow-hidden">
+    <div className="flex flex-col items-center justify-center h-full w-full px-6 py-4 md:px-8 md:py-8 text-center space-y-4 md:space-y-8 relative overflow-hidden">
       {/*  Main Icon with Pulse Effect */}
       <div className="relative mt-2 md:mt-4">
         <motion.div
           initial={{ scale: 0, rotate: -45 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: "spring", bounce: 0.5 }}
-          className={`relative z-10 p-5 md:p-8   backdrop-blur-md`}
+          className={`relative z-10 p-5 md:p-8 backdrop-blur-md`}
         >
           <Icon className={`w-12 h-12 md:w-20 md:h-20 ${activeConfig.color}`} />
         </motion.div>
       </div>
 
       {/*  Text Content */}
-      <div className="space-y-4 md:space-y-6 max-w-sm w-full">
+      <div className="space-y-4 md:space-y-6 max-w-[310px] md:max-w-[330px] w-full mx-auto">
         {/* Title */}
         <motion.h2
           initial={{ opacity: 0, scale: 0.9 }}

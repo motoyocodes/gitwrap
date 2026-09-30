@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://gitwrap-mu.vercel.app"),
-  title: "GitWrap 2025",
+  title: "GitWrap | GitHub Wrapped",
   description: "Spotify Wrapped for your GitHub code and developer persona.",
 };
 

@@ -1,7 +1,9 @@
 import { StoryData, WeeklyVibeData, DayContribution, TopRepoData } from "@/types";
 
-export function processGitHubData(data: any): StoryData {
+export function processGitHubData(data: any, year?: number): StoryData {
   const { contributionsCollection, repositories } = data;
+  const currentYear = year ?? new Date().getFullYear();
+  const years: number[] = contributionsCollection?.contributionYears ?? [currentYear];
 
   // 1. Get total commits
   const totalCommits = contributionsCollection?.totalCommitContributions || 0;
@@ -153,39 +155,33 @@ export function processGitHubData(data: any): StoryData {
 
   let weeklyTitle = "The Steady Flow";
   let weeklyDesc = "Consistent momentum across the entire week.";
-  let weeklyRoast =
-    "You don't have a schedule, code just leaks out of you 24/7.";
+  let weeklyRoast = "Code just leaks out of you 24/7 without a schedule.";
 
   if (totalSampled > 0) {
     if (weekendPct >= 45) {
       weeklyTitle = "The Weekend Warrior";
-      weeklyDesc = `${weekendPct}% of your commits drop on weekends. Who needs grass?`;
-      weeklyRoast = "You treat Saturday and Sunday as bonus sprint cycles.";
+      weeklyDesc = `${weekendPct}% of commits drop on Saturday & Sunday.`;
+      weeklyRoast = "Saturday and Sunday are your bonus sprint cycles.";
     } else if (fridayCount === 0 && totalSampled >= 10) {
       weeklyTitle = "Never On A Friday";
-      weeklyDesc =
-        "Zero Friday commits detected. The ultimate production survivor.";
-      weeklyRoast = "You shut down Slack at 4:30 PM and never look back.";
+      weeklyDesc = "Zero Friday commits detected.";
+      weeklyRoast = "Shutting down Slack at 4:30 PM like a seasoned survivor.";
     } else if (peakDayIndex === 0) {
       weeklyTitle = "The Sunday Panic Pusher";
-      weeklyDesc =
-        "Sunday is your heaviest commit day. Deadline adrenaline is real.";
-      weeklyRoast =
-        "Cramming commits before Monday morning standup. We see you.";
+      weeklyDesc = "Sunday is your heaviest commit day.";
+      weeklyRoast = "Cramming commits right before Monday morning standup.";
     } else if (peakDayIndex === 1) {
       weeklyTitle = "The Monday Sprinter";
-      weeklyDesc =
-        "Hitting the ground running on Monday morning with zero chill.";
+      weeklyDesc = "Hitting peak speed every Monday morning.";
       weeklyRoast = "Calm down, it's just Monday. The servers will survive.";
     } else if (weekendPct <= 10) {
       weeklyTitle = "The Corporate Clockworker";
-      weeklyDesc =
-        "Strict 9-to-5 Monday through Friday. Work-life balance is elite.";
+      weeklyDesc = "Strict 9-to-5 Monday through Friday.";
       weeklyRoast = "Your git history matches an office badge swipe card.";
     } else {
-      weeklyTitle = `The ${peakDayName} Powerhouse`;
-      weeklyDesc = `Peak velocity achieved every ${peakDayName}.`;
-      weeklyRoast = `Most productive on ${peakDayName}s, running on vibes the rest of the week.`;
+      weeklyTitle = `${peakDayName} Powerhouse`;
+      weeklyDesc = `Peak velocity locked in every ${peakDayName}.`;
+      weeklyRoast = `Most productive on ${peakDayName}s, vibes the rest of the week.`;
     }
   }
 
@@ -222,6 +218,8 @@ export function processGitHubData(data: any): StoryData {
   }
 
   return {
+    year: currentYear,
+    years,
     username: data.login,
     name: data.name || data.login,
     avatarUrl: data.avatarUrl,

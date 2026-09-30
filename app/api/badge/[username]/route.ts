@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { fetchGitHubStats } from "@/lib/github";
 import { processGitHubData } from "@/lib/transformData";
+import { resolveYear } from "@/lib/year";
 
 export async function GET(
   req: NextRequest,
@@ -8,7 +9,8 @@ export async function GET(
 ) {
   try {
     const { username } = await params;
-    const rawData = await fetchGitHubStats(username);
+    const year = resolveYear(new URL(req.url).searchParams.get("year"));
+    const rawData = await fetchGitHubStats(username, year);
 
     let commits = 0;
     let vibe = "The Developer";
@@ -17,7 +19,7 @@ export async function GET(
     let avatarUrl = "";
 
     if (rawData) {
-      const cleanData = processGitHubData(rawData);
+      const cleanData = processGitHubData(rawData, year);
       commits = cleanData.totalCommits;
       vibe = cleanData.vibe;
       topLang = cleanData.topLanguages[0]?.name || "Code";
@@ -110,7 +112,7 @@ export async function GET(
   <g transform="translate(24, 20)">
     <!-- GitWrap Pill -->
     <rect x="0" y="0" width="116" height="22" rx="11" fill="#1e1b4b" stroke="#4338ca" stroke-width="1" />
-    <text x="13" y="15" fill="#a5b4fc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" letter-spacing="1">GITWRAP 2025</text>
+    <text x="13" y="15" fill="#a5b4fc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" letter-spacing="1">GITWRAP ${year}</text>
 
     <!-- Live Status Dot -->
     <circle cx="466" cy="11" r="4" fill="#10b981" />
@@ -123,11 +125,10 @@ export async function GET(
     <circle cx="50" cy="90" r="24" fill="#312e81" stroke="#6366f1" stroke-width="1.5" />
     <text x="50" y="97" fill="#e0e7ff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="800" text-anchor="middle">${firstLetter}</text>
 
-    ${
-      avatarBase64
+    ${avatarBase64
         ? `<image href="${avatarBase64}" x="26" y="66" width="48" height="48" clip-path="url(#avatarClip)" />`
         : ""
-    }
+      }
 
     <!-- Username & Persona -->
     <text x="88" y="86" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="19" font-weight="800">@${safeUsername}</text>

@@ -18,12 +18,12 @@ export default function SlideLanguages({ data }: SlideLanguagesProps) {
   const maxCount = data.topLanguages[0]?.count || 0;
 
   return (
-    <div className="flex flex-col h-full w-full p-8 md:pb-15 pt-30">
+    <div className="flex flex-col justify-center h-full w-full px-6 py-6 md:px-8 pt-14 md:pt-16 pb-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-8"
+        className="text-center mb-6"
       >
         <h2 className="text-3xl font-bold text-white tracking-tight">
           The Arsenal
@@ -32,7 +32,7 @@ export default function SlideLanguages({ data }: SlideLanguagesProps) {
       </motion.div>
 
       {/*  List */}
-      <div className="flex flex-col gap-6 w-full max-w-sm mx-auto">
+      <div className="flex flex-col gap-5 w-full max-w-[310px] md:max-w-[330px] mx-auto px-1">
         {data.topLanguages.map((lang, index) => {
           // Calculate width percentage relative to the top language
           const percentage = maxCount > 0 ? (lang.count / maxCount) * 100 : 0;
