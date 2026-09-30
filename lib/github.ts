@@ -1,9 +1,12 @@
 const GITHUB_GRAPHQL_API = "https://api.github.com/graphql";
 
-export async function fetchGitHubStats(username: string) {
-  //  Query to get users Profile, Contribution Calendar, and Top Repos
+export async function fetchGitHubStats(username: string, year: number = new Date().getFullYear()) {
+  const from = `${year}-01-01T00:00:00Z`;
+  const endOfYear = new Date(`${year}-12-31T23:59:59Z`);
+  const to = (endOfYear > new Date() ? new Date() : endOfYear).toISOString();
+
   const query = `
-  query($username: String!) {
+  query($username: String!, $from: DateTime!, $to: DateTime!) {
     user(login: $username) {
       name
       login
@@ -11,17 +14,13 @@ export async function fetchGitHubStats(username: string) {
       bio
       company
       location
-      followers {
-        totalCount
-      }
-      contributionsCollection {
+      followers { totalCount }
+      contributionsCollection(from: $from, to: $to) {
+        contributionYears
         totalCommitContributions
-        # For Night Owl and Weekly Rhythm analytics
         commitContributionsByRepository(maxRepositories: 20) {
           contributions(first: 50) {
-            nodes {
-              occurredAt
-            }
+            nodes { occurredAt }
           }
         }
       }
@@ -30,12 +29,7 @@ export async function fetchGitHubStats(username: string) {
           name
           stargazerCount
           languages(first: 1, orderBy: {field: SIZE, direction: DESC}) {
-            edges {
-              node {
-                name
-                color
-              }
-            }
+            edges { node { name color } }
           }
         }
       }
@@ -57,12 +51,11 @@ export async function fetchGitHubStats(username: string) {
       },
       body: JSON.stringify({
         query,
-        variables: { username: username },
+        variables: { username, from, to },
       }),
-      //  CACHING
       next: {
-        revalidate: 86400, // Cache this data for 24 hours
-        tags: [`user-${username}`], // Tag it so I can clear it later if needed
+        revalidate: 86400,
+        tags: [`user-${username}-${year}`],
       },
     });
 

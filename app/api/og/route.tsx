@@ -6,6 +6,7 @@ export const runtime = "edge";
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
+    const year = searchParams.get("year") || new Date().getFullYear().toString();
     const username = searchParams.get("username") || "developer";
     const commits = searchParams.get("commits") || "100+";
     const vibe = searchParams.get("vibe") || "The Developer";
@@ -54,7 +55,7 @@ export async function GET(req: NextRequest) {
                 color: "#a1a1aa",
               }}
             >
-              GITWRAP 2025
+              GITWRAP {year}
             </div>
             <div
               style={{

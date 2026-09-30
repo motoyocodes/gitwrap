@@ -2,26 +2,30 @@ import type { Metadata } from "next";
 import { fetchGitHubStats } from "@/lib/github";
 import StoryContainer from "@/components/StoryContainer";
 import { processGitHubData } from "@/lib/transformData";
+import { resolveYear } from "@/lib/year";
 import Link from "next/link";
+import YearPicker from "@/components/YearPicker";
 
 // This type tells Nextjs that params is a Promise
 type Props = {
   params: Promise<{ username: string }>;
+  searchParams: Promise<{ year?: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { username } = await params;
-  const rawData = await fetchGitHubStats(username);
+  const year = resolveYear((await searchParams).year);
+  const rawData = await fetchGitHubStats(username, year);
 
   if (!rawData) {
     return {
-      title: `${username} | GitWrap 2025`,
+      title: `${username} | GitWrap ${year}`,
       description: `Developer stats not found for @${username}.`,
     };
   }
 
   const clean = processGitHubData(rawData);
-  const ogUrl = `/api/og?username=${encodeURIComponent(clean.username)}&commits=${clean.totalCommits}&vibe=${encodeURIComponent(clean.vibe)}&lang=${encodeURIComponent(clean.topLanguages[0]?.name || "Code")}&avatar=${encodeURIComponent(clean.avatarUrl || "")}`;
+  const ogUrl = `/api/og?username=${encodeURIComponent(clean.username)}&year=${year}&commits=${clean.totalCommits}&vibe=${encodeURIComponent(clean.vibe)}&lang=${encodeURIComponent(clean.topLanguages[0]?.name || "Code")}&avatar=${encodeURIComponent(clean.avatarUrl || "")}`;
 
   return {
     title: `@${clean.username}'s 2025 Wrapped • ${clean.vibe}`,
@@ -47,12 +51,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function WrapPage({ params }: Props) {
+export default async function WrapPage({ params, searchParams }: Props) {
   //  Await the params to get the username
   const { username } = await params;
+  const year = resolveYear((await searchParams).year);
 
   //  Fetch Data dynamically
-  const rawData = await fetchGitHubStats(username);
+  const rawData = await fetchGitHubStats(username, year);
 
   //  Handle 404 (User not found)
   if (!rawData) {
@@ -87,6 +92,7 @@ export default async function WrapPage({ params }: Props) {
 
   //  Transform & Render
   const cleanData = processGitHubData(rawData);
+  const years: number[] = rawData.contributionsCollection?.contributionYears ?? [year];
 
   return (
     <div className="h-screen w-full bg-stone-950 relative">
@@ -104,12 +110,14 @@ export default async function WrapPage({ params }: Props) {
       `,
           backgroundSize: "100% 100%",
         }}
+
       />
       <main className=" bg-black flex h-screen items-center justify-center p-0 md:py-4">
         <div className="w-full h-screen md:h-auto md:max-w-md  bg-zinc-950 md:rounded-3xl border-0 md:border border-zinc-800 overflow-hidden relative shadow-2xl">
           <StoryContainer data={cleanData} />
         </div>
       </main>
+      <YearPicker years={years} current={year} />
     </div>
   );
 }
